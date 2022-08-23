@@ -13,7 +13,7 @@ class TaskListViewController: UITableViewController {
     
     private let cellID = "task"
     private var taskList: [Task] = []
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellID)
@@ -21,7 +21,7 @@ class TaskListViewController: UITableViewController {
         setupNavigationBar()
         fetchData()
     }
-
+    
     private func setupNavigationBar() {
         title = "Task List"
         navigationController?.navigationBar.prefersLargeTitles = true
@@ -94,19 +94,6 @@ class TaskListViewController: UITableViewController {
             }
         }
     }
-    
-    private func delete(_ taskName: String) {
-        let task = Task(context: viewContext)
-        task.title = taskName
-        taskList.append(task)
-        
-        let cellIndex = IndexPath(row: taskList.count - 1, section: 0)
-        tableView.insertRows(at: [cellIndex], with: .automatic)
-        
-        if viewContext.hasChanges {
-            viewContext.delete(task)
-        }
-    }
 }
 
 extension TaskListViewController {
@@ -124,6 +111,18 @@ extension TaskListViewController {
     }
     
     override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCell.EditingStyle {
-        return .delete
+        .delete
     }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            
+            viewContext.delete(taskList[indexPath.row])
+            taskList.remove(at: indexPath.row)
+            StorageManager.shared.saveContext()
+            
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
+
 }
