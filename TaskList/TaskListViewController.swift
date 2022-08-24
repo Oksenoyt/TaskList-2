@@ -64,36 +64,33 @@ class TaskListViewController: UITableViewController {
     
     private func showAlert(withTitle title: String, andMessage message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let indexPath = tableView.indexPathForSelectedRow?.row
+        
         let saveAction = UIAlertAction(title: "Save", style: .default) { [unowned self] _ in
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
             save(task)
         }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-        alert.addAction(saveAction)
-        alert.addAction(cancelAction)
-        alert.addTextField { textField in
-            textField.placeholder = "New Task"
-        }
-        
-        present(alert, animated: true)
-    }
-    
-    private func editAlert(withTitle title: String, andMessage message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        guard let indexPath = tableView.indexPathForSelectedRow?.row else { return }
         
         let editAction = UIAlertAction(title: "Edit", style: .default) { [unowned self] _ in
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
-            taskList[indexPath].title = task
+            taskList[indexPath ?? 0].title = task
             StorageManager.shared.saveContext()
             tableView.reloadData()
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
-        alert.addAction(editAction)
-        alert.addAction(cancelAction)
-        alert.addTextField { [unowned self] textField in
-            textField.text = taskList[indexPath].title
+        if indexPath != nil {
+            alert.addAction(editAction)
+            alert.addAction(cancelAction)
+            alert.addTextField { [unowned self] textField in
+                textField.text = taskList[indexPath ?? 0].title
+            }
+        } else {
+            alert.addAction(saveAction)
+            alert.addAction(cancelAction)
+            alert.addTextField { textField in
+                textField.placeholder = "New Task"
+            }
         }
         present(alert, animated: true)
     }
@@ -142,6 +139,6 @@ extension TaskListViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        editAlert(withTitle: "Edit Task", andMessage: "What do you want to change?")
+        showAlert(withTitle: "Edit Task", andMessage: "What do you want to change?")
     }
 }
