@@ -86,6 +86,7 @@ class TaskListViewController: UITableViewController {
             guard let task = alert.textFields?.first?.text, !task.isEmpty else { return }
             taskList[indexPath].title = task
             StorageManager.shared.saveContext()
+            tableView.reloadData()
         }
         
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive)
